@@ -14,9 +14,9 @@ const Calculator = () => {
   const calculateFinalPrice = (price: string, additionalCosts: string[]) => {
     let total = parseFloat(price);
     additionalCosts.forEach((cost) => {
-      total += cost;
+      total += parseFloat(cost);
     });
-    return total;
+    return total.toFixed(2);
   };
 
   // Watch the additional costs to automatically update the final price
