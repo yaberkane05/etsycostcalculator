@@ -5,12 +5,12 @@ const Home = () => {
   return (
     <div>
       <Head>
-        <title>EtsyCostCalculator</title>
+        <title>Etsy Cost Calculator</title>
       </Head>
 
-      <main className="min-h-screen flex items-center justify-center bg-slate-50">
+      <main className="flex items-center justify-center min-h-screen bg-slate-50">
         <div>
-          {/* <h1 className="text-3xl font-semibold mb-6">Etsy Cost Calculator</h1> */}
+          <h1 className="mb-6 text-3xl font-semibold">Etsy Cost Calculator</h1>
           <Calculator />
         </div>
       </main>
