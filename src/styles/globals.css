@@ -2,6 +2,10 @@
 @tailwind components;
 @tailwind utilities;
 
+body {
+    font-size: 2rem;
+}
+
 input {
-    width: 4rem;
+    width: 8rem;
 }
