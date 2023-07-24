@@ -5,19 +5,15 @@ const Home = () => {
   return (
     <div>
       <Head>
-        <title>Etsy fees & product cost price calculator</title>
+        <title>EtsyCostCalculator</title>
       </Head>
 
-      <main className="min-h-screen flex items-center justify-center">
+      <main className="min-h-screen flex items-center justify-center bg-slate-50">
         <div>
-          <h1 className="text-3xl font-semibold mb-6">Etsy fees & product cost price calculator</h1>
+          <h1 className="text-3xl font-semibold mb-6">Etsy Cost Calculator</h1>
           <Calculator />
         </div>
       </main>
-
-      <footer className="text-center py-4 bg-gray-200">
-        <p>Powered by Next.js</p>
-      </footer>
     </div>
   );
 };
