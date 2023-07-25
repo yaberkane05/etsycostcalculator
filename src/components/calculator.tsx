@@ -1,6 +1,23 @@
 /* eslint-disable react/no-unescaped-entities */
+import * as Toggle from '@radix-ui/react-toggle';
 import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
+
+const globalVat = 0.21;
+
+const getVat = (cost: number): number => {
+	return !isNaN(cost) ? cost * globalVat: 0;
+};
+
+const ToggleVAT = ({vat, onPressedChange = (x) => {}}) => (
+	<Toggle.Root
+		aria-label="Toggle italic"
+		className="hover:bg-violet3 color-mauve11 data-[state=on]:bg-violet6 data-[state=on]:text-violet12 shadow-blackA7 flex h-[35px] w-[35px] items-center justify-center rounded bg-white text-base leading-4 shadow-[0_2px_10px] focus:shadow-[0_0_0_2px] focus:shadow-black"
+		onPressedChange={(x) => {onPressedChange(x)}}
+	>
+		{vat}
+	</Toggle.Root>
+);
 
 interface IFormInputs {
     initialCost: number;
@@ -62,18 +79,40 @@ const Calculator = () => {
     }, [watchInitialCost, watchShippingCost, watchCountryTax]);
 
 	return (
+		<table className="table-auto">
+		  <thead>
+		    <tr>
+		      <th>Nom du frais/taxe</th>
+		      <th>Prix</th>
+		      <th>TVA</th>
+		    </tr>
+		  </thead>
+		  <tbody>
+		    <tr>
+				<td>Fabrication</td>
+				<td>
+					<input
+						type='number'
+						min={0}
+						step={0.01}
+						className='border-red-500 invalid:border'
+                	    defaultValue={0.0}
+                	    {...register("initialCost", { required: true })}
+					></input>
+				</td>
+				<td>
+					<ToggleVAT
+						vat={getVat(getValues().initialCost)}
+						onPressedChange={(x) => {x ? setValue('initialCost', getValues().initialCost * globalVat): setValue('initialCost', getValues().initialCost - (getValues().initialCost * globalVat))}}
+					/>
+				</td>
+		    </tr>
+		  </tbody>
+		</table>
+	);
+
+	return (
 		<form>
-			<div>
-				<span className="mr-2">Fabrication</span>
-				<input
-					type='number'
-					min={0}
-					step={0.01}
-					className='border-red-500 invalid:border'
-                    defaultValue={0.0}
-                    {...register("initialCost", { required: true })}
-				></input>
-			</div>
 			<div>
 				<span className="mr-2">Livraison</span>
 				<input
