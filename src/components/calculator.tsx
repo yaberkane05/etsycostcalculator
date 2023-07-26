@@ -1,7 +1,8 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable react/no-unescaped-entities */
-import { ChangeEvent, useEffect } from 'react';
+import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
+import ToggleVAT from './toggle-vat';
 
 const globalVat = 0.21;
 const currency = '€';
@@ -17,38 +18,30 @@ interface IFormInputs {
     initialCostRes: number;
     shippingCost: number;
     shippingCostRes: number;
-    listingCost: number;
-    relistingAfterSaleCost: number;
-    processingCost: number;
     countryTax: number;
+    countryTaxRes: number;
+    listingCost: number;
+    listingCostRes: number;
+    relistingAfterSaleCost: number;
+    relistingAfterSaleCostRes: number;
+    processingCost: number;
+    processingCostRes: number;
     transactionCost: number;
     transactionShippingCost: number;
     total: number;
     vatTrigger: any;
 }
 
-const initialValues = {
-    initialCost: 0.0,
-    shippingCost: 0.0,
-    listingCost: 0.2,
-    relistingAfterSaleCost: 0.2,
-    processingCost: 0.3,
-    countryTax: 0.0,
-    transactionCost: 0.0,
-    transactionShippingCost: 0.0,
-};
-
 const RealtimeValues: { [name: string]: IPrice } = {
     initialCost: { price: 0.0, vat: 0.0, isVat: true },
     shippingCost: { price: 0.0, vat: 0.0, isVat: true },
-    listingCost: { price: 0.2, vat: 0.0, isVat: false },
-    relistingAfterSaleCost: { price: 0.2, vat: 0.0, isVat: false },
-    processingCost: { price: 0.3, vat: 0.0, isVat: false },
+    listingCost: { price: 0.2, vat: 0.0, isVat: true },
+    relistingAfterSaleCost: { price: 0.2, vat: 0.0, isVat: true },
+    processingCost: { price: 0.3, vat: 0.0, isVat: true },
     countryTax: { price: 0.0, vat: 0.0, isVat: false },
     transactionCost: { price: 0.0, vat: 0.0, isVat: false },
     transactionShippingCost: { price: 0.0, vat: 0.0, isVat: false },
 };
-
 
 const Calculator = () => {
 
@@ -59,14 +52,18 @@ const Calculator = () => {
         setValue,
     } = useForm<IFormInputs>();
 
-    const watchInitialCost = watch('initialCost', initialValues.initialCost);
+    const watchInitialCost = watch('initialCost', RealtimeValues.initialCost.price);
     const watchShippingCost = watch('shippingCost', RealtimeValues.shippingCost.price);
-    const watchCountryTax = watch('countryTax', initialValues.countryTax);
+    const watchCountryTax = watch('countryTax', RealtimeValues.countryTax.price);
     const watchVatTrigger = watch('vatTrigger');
 
     useEffect(() => {
         setValue('initialCostRes', getResult(RealtimeValues.initialCost));
         setValue('shippingCostRes', getResult(RealtimeValues.shippingCost));
+        setValue('countryTaxRes', getResult(RealtimeValues.countryTax));
+        setValue('listingCostRes', getResult(RealtimeValues.listingCost));
+        setValue('relistingAfterSaleCostRes', getResult(RealtimeValues.relistingAfterSaleCost));
+        setValue('processingCostRes', getResult(RealtimeValues.processingCost));
     }, [watchVatTrigger]);
 
     useEffect(() => {
@@ -79,11 +76,20 @@ const Calculator = () => {
         setValue('initialCostRes', getResult(RealtimeValues.initialCost));
         RealtimeValues['shippingCost'] = { price: shippingCost, vat: RealtimeValues.shippingCost.isVat ? calculateVAT(shippingCost): 0, isVat: RealtimeValues.shippingCost.isVat };
         setValue('shippingCostRes', getResult(RealtimeValues.shippingCost));
+        RealtimeValues['countryTax'] = { price: countryTax, vat: RealtimeValues.countryTax.isVat ? calculateVAT(countryTax): 0, isVat: RealtimeValues.countryTax.isVat };
+        setValue('countryTaxRes', getResult(RealtimeValues.countryTax));
+        //refactor to do it once
+        RealtimeValues['listingCost'] = { price: RealtimeValues.listingCost.price, vat: RealtimeValues.listingCost.isVat ? calculateVAT(RealtimeValues.listingCost.price): 0, isVat: RealtimeValues.listingCost.isVat };
+        setValue('listingCostRes', getResult(RealtimeValues.listingCost));
+        RealtimeValues['relistingAfterSaleCost'] = { price: RealtimeValues.relistingAfterSaleCost.price, vat: RealtimeValues.relistingAfterSaleCost.isVat ? calculateVAT(RealtimeValues.relistingAfterSaleCost.price): 0, isVat: RealtimeValues.relistingAfterSaleCost.isVat };
+        setValue('relistingAfterSaleCostRes', getResult(RealtimeValues.relistingAfterSaleCost));
+        //
 
-        // const totalOrder: number = +initialCost + +shippingCost + +countryTax;
+        const totalOrder: number = +initialCost + +shippingCost + +countryTax;
 
-        // const processingCost = (0.04 * totalOrder) + 0.3;
-        // setValue('processingCost.price', +processingCost.toPrecision(4));
+        const processingCost = (0.04 * totalOrder) + 0.3;
+        RealtimeValues['processingCost'] = { price: processingCost, vat: RealtimeValues.processingCost.isVat ? calculateVAT(processingCost): 0, isVat: RealtimeValues.processingCost.isVat };
+        setValue('processingCostRes', getResult(RealtimeValues.processingCost));
 
         // const transactionCost = 0.065 * initialCost;
         // setValue('transactionCost.price', +transactionCost.toPrecision(4));
@@ -126,7 +132,7 @@ const Calculator = () => {
 					    	    type='number'
 					    	    min={0}
 					    	    step={0.1}
-                	            defaultValue={0.0}
+                	            defaultValue={RealtimeValues.initialCost.price}
                 	            {...register("initialCost", { required: true })}
 					        />
                         </td>
@@ -157,7 +163,7 @@ const Calculator = () => {
 					    	    type='number'
 					    	    min={0}
 					    	    step={0.1}
-                	            defaultValue={0.0}
+                	            defaultValue={RealtimeValues.shippingCost.price}
                 	            {...register("shippingCost", { required: true })}
 					        />
                         </td>
@@ -179,6 +185,122 @@ const Calculator = () => {
                             />
                         </td>
                     </tr>
+                    <tr className="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
+                        <th scope="row" className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                            Taxe de vente payée par l'acheteur
+                        </th>
+                        <td className="px-6 py-4">
+                            <input
+					    	    type="number"
+					    	    min={0}
+					    	    step={0.1}
+                	            defaultValue={RealtimeValues.countryTax.price}
+                	            {...register("countryTax", { required: true })}
+					        />
+                        </td>
+                        <td className="px-6 py-4">
+                            <input
+                                className="border-0"
+                                type="number"
+                                disabled
+                                {...register("countryTaxRes")}
+                            />
+                        </td>
+                        <td className="px-6 py-4">
+                            /
+                        </td>
+                    </tr>
+                    <tr className="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
+                        <th scope="row" className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                            Frais de mise en vente
+                        </th>
+                        <td className="px-6 py-4">
+                            <input
+                                className="border-0"
+					    	    type="number"
+                                disabled
+					    	    min={0}
+					    	    step={0.1}
+                	            defaultValue={RealtimeValues.listingCost.price}
+                	            {...register("listingCost", { required: true })}
+					        />
+                        </td>
+                        <td className="px-6 py-4">
+                            <input
+                                className="border-0"
+                                type="number"
+                                disabled
+                                {...register("listingCostRes")}
+                            />
+                        </td>
+                        <td className="px-6 py-4">
+                            <ToggleVAT
+                                    defaultChecked={RealtimeValues.shippingCost.isVat}
+                                    changed={(x) => {
+                                        setVAT(x.target.checked, 'listingCost');
+                                        setValue('vatTrigger', Math.random());
+                                    }}
+                                />
+                        </td>
+                    </tr>
+                    <tr className="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
+                        <th scope="row" className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                            Frais de remise en vente
+                        </th>
+                        <td className="px-6 py-4">
+                            <input
+                                className="border-0"
+					    	    type="number"
+                                disabled
+					    	    min={0}
+					    	    step={0.1}
+                	            defaultValue={RealtimeValues.relistingAfterSaleCost.price}
+                	            {...register("relistingAfterSaleCost", { required: true })}
+					        />
+                        </td>
+                        <td className="px-6 py-4">
+                            <input
+                                className="border-0"
+                                type="number"
+                                disabled
+                                {...register("relistingAfterSaleCostRes")}
+                            />
+                        </td>
+                        <td className="px-6 py-4">
+                            <ToggleVAT
+                                    defaultChecked={RealtimeValues.relistingAfterSaleCost.isVat}
+                                    changed={(x) => {
+                                        setVAT(x.target.checked, 'relistingAfterSaleCost');
+                                        setValue('vatTrigger', Math.random());
+                                    }}
+                                />
+                        </td>
+                    </tr>
+                    <tr className="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
+                        <th scope="row" className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                            Frais de traitement (4% du total de la commande + 30c)
+                        </th>
+                        <td className="px-6 py-4">
+                            /
+                        </td>
+                        <td className="px-6 py-4">
+                            <input
+                                className="border-0"
+                                type="number"
+                                disabled
+                                {...register("processingCostRes")}
+                            />
+                        </td>
+                        <td className="px-6 py-4">
+                            <ToggleVAT
+                                    defaultChecked={RealtimeValues.processingCost.isVat}
+                                    changed={(x) => {
+                                        setVAT(x.target.checked, 'processingCost');
+                                        setValue('vatTrigger', Math.random());
+                                    }}
+                                />
+                        </td>
+                    </tr>
                 </tbody>
             </table>
             <input hidden {...register("vatTrigger")} />
@@ -187,60 +309,6 @@ const Calculator = () => {
 
 	return (
 		<form>
-			<div>
-				<span className="mr-2">Livraison</span>
-				<input
-					type='number'
-					min={0}
-					step={0.01}
-                    defaultValue={0.0}
-					className='border-red-500 invalid:border'
-                    {...register("shippingCost", { required: true })}
-				></input>
-			</div>
-			<div>
-				<span className='mr-2'>Taxe de vente payée par l'acheteur</span>
-				<input
-					type='number'
-					min={0}
-					step={0.01}
-                    defaultValue={initialValues.countryTax}
-                    {...register("countryTax")}
-				></input>
-			</div>
-			<div>
-				<span className="mr-2">Mise en vente</span>
-				<input
-					type='number'
-					min={0}
-					step={0.01}
-					disabled
-					defaultValue={initialValues.listingCost}
-                    {...register("listingCost")}
-				></input>
-			</div>
-			<div>
-				<span className='mr-2'>Remise en vente après vente</span>
-				<input
-					type='number'
-					min={0}
-					step={0.01}
-					disabled
-                    defaultValue={initialValues.relistingAfterSaleCost}
-                    {...register("relistingAfterSaleCost")}
-				></input>
-			</div>
-			<div>
-				<span className='mr-2'>Frais de traitement (4% du total de la commande + 30c)</span>
-				<input
-					type='number'
-					min={0}
-					step={0.01}
-					disabled
-                    defaultValue={initialValues.processingCost}
-                    {...register("processingCost")}
-				></input>
-			</div>
 			<div>
 				<span className='mr-2'>Frais de transaction (6.5% du total des articles)</span>
 				<input
@@ -288,20 +356,6 @@ const setVAT = (truthy: boolean, field: string): void => {
     RealtimeValues[field] = t;
 };
 
-const getResult = (value: IPrice): number => +value.price + +value.vat;
-
-// components
-const ToggleVAT = (defaultChecked: boolean, {changed = (c: ChangeEvent<HTMLInputElement>) => {}}) => (
-    <label className="relative inline-flex items-center cursor-pointer">
-        <input
-            type="checkbox"
-            className="sr-only peer"
-            defaultChecked={defaultChecked}
-            onChange={c => changed(c)}
-        />
-        <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
-        <span className="ml-3 text-sm font-medium text-gray-900 dark:text-gray-300"/>
-    </label>
-);
+const getResult = (value: IPrice): number => +(+value.price + +value.vat).toPrecision(4);
 
 export default Calculator;
