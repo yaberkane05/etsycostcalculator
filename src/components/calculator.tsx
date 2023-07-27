@@ -11,6 +11,8 @@ interface IPrice {
 };
 
 interface IFormInputs {
+    manufacturingCost: number;
+    manufacturingCostRes: number;
     initialCost: number;
     initialCostRes: number;
     shippingCost: number;
@@ -28,6 +30,8 @@ interface IFormInputs {
     transactionShippingCost: number;
     transactionShippingCostRes: number;
     total: number;
+    totalOrder: number;
+    profit: number;
     vatTrigger: any;
 }
 
@@ -44,6 +48,9 @@ const RealtimeValues: { [name: string]: IPrice } = {
     transactionCost: { price: 0.0, vat: 0.0, isVat: true },
     transactionShippingCost: { price: 0.0, vat: 0.0, isVat: true },
     total: { price: 0.0, vat: 0.0, isVat: false },
+    totalOrder: { price: 0.0, vat: 0.0, isVat: false },
+    manufacturingCost: { price: 0.0, vat: 0.0, isVat: false },
+    profit: { price: 0.0, vat: 0.0, isVat: false }
 };
 
 const Calculator = () => {
@@ -58,10 +65,12 @@ const Calculator = () => {
     const watchInitialCost = watch('initialCost', RealtimeValues.initialCost.price);
     const watchShippingCost = watch('shippingCost', RealtimeValues.shippingCost.price);
     const watchCountryTax = watch('countryTax', RealtimeValues.countryTax.price);
+    const watchManufacturingCost = watch('manufacturingCost', RealtimeValues.manufacturingCost.price);
     const watchVatTrigger = watch('vatTrigger');
 
     useEffect(() => {
         setValue('initialCostRes', getResult(RealtimeValues.initialCost));
+        setValue('manufacturingCostRes', getResult(RealtimeValues.manufacturingCost));
         setValue('shippingCostRes', getResult(RealtimeValues.shippingCost));
         setValue('countryTaxRes', getResult(RealtimeValues.countryTax));
         setValue('listingCostRes', getResult(RealtimeValues.listingCost));
@@ -76,23 +85,26 @@ const Calculator = () => {
     useEffect(() => {
         const values = getValues();
         const initialCost: number = values.initialCost;
+        const manufacturingCost: number = values.manufacturingCost;
         const shippingCost: number = values.shippingCost;
         const countryTax: number = values.countryTax;
         
         RealtimeValues['initialCost'] = { price: initialCost, vat: RealtimeValues.initialCost.isVat ? calculateVAT(initialCost): 0, isVat: RealtimeValues.initialCost.isVat };
         setValue('initialCostRes', getResult(RealtimeValues.initialCost));
+        RealtimeValues['manufacturingCost'] = { price: manufacturingCost, vat: RealtimeValues.manufacturingCost.isVat ? calculateVAT(manufacturingCost): 0, isVat: RealtimeValues.manufacturingCost.isVat };
+        setValue('manufacturingCostRes', getResult(RealtimeValues.manufacturingCost));
         RealtimeValues['shippingCost'] = { price: shippingCost, vat: RealtimeValues.shippingCost.isVat ? calculateVAT(shippingCost): 0, isVat: RealtimeValues.shippingCost.isVat };
         setValue('shippingCostRes', getResult(RealtimeValues.shippingCost));
         RealtimeValues['countryTax'] = { price: countryTax, vat: RealtimeValues.countryTax.isVat ? calculateVAT(countryTax): 0, isVat: RealtimeValues.countryTax.isVat };
         setValue('countryTaxRes', getResult(RealtimeValues.countryTax));
-        //refactor to do it once
+        //TODO: refactor to do it once
         RealtimeValues['listingCost'] = { price: RealtimeValues.listingCost.price, vat: RealtimeValues.listingCost.isVat ? calculateVAT(RealtimeValues.listingCost.price): 0, isVat: RealtimeValues.listingCost.isVat };
         setValue('listingCostRes', getResult(RealtimeValues.listingCost));
         RealtimeValues['relistingAfterSaleCost'] = { price: RealtimeValues.relistingAfterSaleCost.price, vat: RealtimeValues.relistingAfterSaleCost.isVat ? calculateVAT(RealtimeValues.relistingAfterSaleCost.price): 0, isVat: RealtimeValues.relistingAfterSaleCost.isVat };
         setValue('relistingAfterSaleCostRes', getResult(RealtimeValues.relistingAfterSaleCost));
         //
 
-        const totalOrder: number = +initialCost + +shippingCost + +countryTax;
+        const totalOrder: number = +(+initialCost + +shippingCost + +countryTax).toPrecision(4);
 
         const processingCost = (0.04 * totalOrder) + 0.3;
         RealtimeValues['processingCost'] = { price: processingCost, vat: RealtimeValues.processingCost.isVat ? calculateVAT(processingCost): 0, isVat: RealtimeValues.processingCost.isVat };
@@ -107,10 +119,14 @@ const Calculator = () => {
         setValue('transactionShippingCostRes', getResult(RealtimeValues.transactionShippingCost));
 
         //total
-        calculateAndSetTotal();
+        const total = calculateAndSetTotal();
+        //sell total
+        setValue('totalOrder', totalOrder);
+        //cost total
+        setValue('profit', +(totalOrder - total - manufacturingCost).toPrecision(4));
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [watchInitialCost, watchShippingCost, watchCountryTax]);
+    }, [watchInitialCost, watchShippingCost, watchCountryTax, watchManufacturingCost]);
 
     const calculateVAT = (cost: number): number => cost * globalVat;
 
@@ -124,7 +140,7 @@ const Calculator = () => {
 
     const getResult = (value: IPrice): number => +(+value.price + +value.vat).toPrecision(4);
 
-    const calculateAndSetTotal = () => {
+    const calculateAndSetTotal = (): number => {
         const values = getValues();
         const listingCostRes: number = values.listingCostRes;
         const relistingAfterSaleCostRes: number = values.relistingAfterSaleCostRes;
@@ -135,7 +151,9 @@ const Calculator = () => {
 
         const total = +listingCostRes + +relistingAfterSaleCostRes + +countryTaxRes + +transactionCostRes + +transactionShippingCostRes + +processingCostRes;
         RealtimeValues['total'] = { price: total, vat: RealtimeValues.total.isVat ? calculateVAT(total): 0, isVat: RealtimeValues.total.isVat };
-        setValue('total', getResult(RealtimeValues.total));
+        const result = getResult(RealtimeValues.total);
+        setValue('total', result);
+        return result;
     }
 
 	return (
@@ -160,7 +178,32 @@ const Calculator = () => {
                 <tbody>
                     <tr className="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
                         <th scope="row" className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
-                            Article
+                            Coût de fabrication
+                        </th>
+                        <td className="px-6 py-4">
+                            <input
+					    	    type='number'
+					    	    min={0}
+					    	    step={0.1}
+                	            defaultValue={RealtimeValues.manufacturingCost.price}
+                	            {...register("manufacturingCost", { required: true })}
+					        />
+                        </td>
+                        <td className="px-6 py-4">
+                            <input
+                                className="border-0"
+                                type="number"
+                                disabled
+                                {...register("manufacturingCostRes")}
+                            />
+                        </td>
+                        <td className="px-6 py-4">
+                            /
+                        </td>
+                    </tr>
+                    <tr className="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
+                        <th scope="row" className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                            Prix de l'article
                         </th>
                         <td className="px-6 py-4">
                             <input
@@ -210,7 +253,7 @@ const Calculator = () => {
                     </tr>
                     <tr className="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
                         <th scope="row" className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
-                            Taxe de vente payée par l'acheteur
+                            Taxe de vente (dépend du pays/état de l'acheteur)
                         </th>
                         <td className="px-6 py-4">
                             <input
@@ -377,14 +420,46 @@ const Calculator = () => {
                 </tbody>
                 <tfoot>
                     <tr className="font-semibold text-gray-900 bg-gray-200 dark:text-white">
-                        <th scope="row" className="px-6 py-3 text-base">Total des frais Etsy</th>
+                        <th scope="row" className="px-6 py-3 text-base">
+                            Total du prix de vente (article + livraison + Taxe de vente)
+                        </th>
                         <td className="px-6 py-3"></td>
                         <td className="px-6 py-3">
                             <input
                                 className="bg-gray-200 border-0"
                                 type="number"
                                 disabled
+                                {...register("totalOrder")}
+                            />
+                            {currency}
+                        </td>
+                        <td className="px-6 py-3"></td>
+                    </tr>
+                    <tr className="font-semibold text-gray-900 bg-gray-300 dark:text-white">
+                        <th scope="row" className="px-6 py-3 text-base">Total des frais Etsy</th>
+                        <td className="px-6 py-3"></td>
+                        <td className="px-6 py-3">
+                            <input
+                                className="bg-gray-300 border-0"
+                                type="number"
+                                disabled
                                 {...register("total")}
+                            />
+                            {currency}
+                        </td>
+                        <td className="px-6 py-3"></td>
+                    </tr>
+                    <tr className="font-semibold text-gray-900 bg-gray-100 dark:text-white">
+                        <th scope="row" className="px-6 py-3 text-base">
+                            Bénéfice
+                        </th>
+                        <td className="px-6 py-3"></td>
+                        <td className="px-6 py-3">
+                            <input
+                                className="bg-gray-100 border-0"
+                                type="number"
+                                disabled
+                                {...register("profit")}
                             />
                             {currency}
                         </td>
