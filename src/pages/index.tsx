@@ -7,7 +7,7 @@ const Home = () => {
         <Head>
             <title>Etsy Cost Calculator</title>
         </Head>
-        <main className="h-auto p-12 m-auto antialiased bg-gray-50">
+        <main className="h-auto p-12 m-auto antialiased">
             <div>
                 <h1 className="mb-6 text-3xl font-semibold">Etsy Cost Calculator</h1>
                 <Calculator />
