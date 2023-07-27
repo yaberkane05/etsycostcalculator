@@ -1,4 +1,5 @@
 import Calculator from '@/components/calculator';
+import { Analytics } from '@vercel/analytics/react';
 import Head from 'next/head';
 import Link from 'next/link';
 
@@ -14,6 +15,7 @@ const Home = () => {
                 <Calculator />
                 <Link className="absolute bottom-1" href={"https://github.com/yaberkane05/etsycostcalculator"}>https://github.com/yaberkane05/etsycostcalculator</Link>
             </div>
+            <Analytics />
         </main>
     </div>
   );
