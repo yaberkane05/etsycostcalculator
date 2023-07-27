@@ -42,8 +42,8 @@ const currency = '€';
 const RealtimeValues: { [name: string]: IPrice } = {
     initialCost: { price: 0.0, vat: 0.0, isVat: false },
     shippingCost: { price: 0.0, vat: 0.0, isVat: false },
-    listingCost: { price: 0.2, vat: 0.0, isVat: true },
-    relistingAfterSaleCost: { price: 0.2, vat: 0.0, isVat: true },
+    listingCost: { price: 0.18, vat: 0.0, isVat: true },
+    relistingAfterSaleCost: { price: 0.18, vat: 0.0, isVat: true },
     processingCost: { price: 0.3, vat: 0.0, isVat: true },
     countryTax: { price: 0, vat: 0, isVat: false },
     transactionCost: { price: 0.0, vat: 0.0, isVat: true },
@@ -175,10 +175,10 @@ const Calculator = () => {
                             Nom du frais/taxe
                         </th>
                         <th scope="col" className="px-6 py-3">
-                            Prix
+                            Prix ({currency})
                         </th>
                         <th scope="col" className="px-6 py-3">
-                            Résultat
+                            Résultat ({currency})
                         </th>
                         <th scope="col" className="px-6 py-3">
                             <span>TVA Pays/état Vendeur</span>
