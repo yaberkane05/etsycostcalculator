@@ -445,7 +445,7 @@ const Calculator = () => {
                 <tfoot>
                     <tr className="font-semibold bg-blue-100 text-slate-900 dark:text-white">
                         <th scope="row" className="px-6 py-3 text-base">
-                            Total du prix de vente (article + livraison + Taxe de vente)
+                            Total du prix de vente (article + livraison + TVA de l'acheteur)
                         </th>
                         <td className="px-6 py-3"></td>
                         <td className="px-6 py-3">
