@@ -200,7 +200,7 @@ const Calculator = () => {
                 <tbody>
                     <tr className="bg-white border-b dark:bg-blue-800 dark:border-blue-700">
                         <th scope="row" className="px-1 py-4 font-medium sm:px-6 text-slate-900 dark:text-white">
-                            Coût de fabrication de l'article
+                            Coût de fabrication et envoi de l'article
                         </th>
                         <td className="px-1 py-4 sm:px-6">
                             <input
