@@ -275,7 +275,7 @@ const Calculator = () => {
                     <tr className="bg-white border-b dark:bg-blue-800 dark:border-blue-700">
                         <th scope="row" className="px-1 py-4 font-medium sm:px-6 text-slate-900 dark:text-white">
                             <p>TVA de l'acheteur (dépend du pays/état de l'acheteur) = x% de (article + livraison)</p>
-                            <p>Exemple Belgique: 21%, Royaume-Uni: 20%, USA: entre 2.9% and 7.25%</p>
+                            <p className="text-gray-400">Exemple Belgique: 21%, Royaume-Uni: 20%, USA: entre 2.9% and 7.25%</p>
                         </th>
                         <td className="px-1 py-4 sm:px-6">
                             <div className="whitespace-nowrap">
@@ -448,7 +448,8 @@ const Calculator = () => {
                 <tfoot>
                     <tr className="font-semibold bg-blue-100 text-slate-900 dark:text-white">
                         <th scope="row" className="px-1 py-3 sm:px-6">
-                            Total du prix de vente (article + livraison + TVA de l'acheteur)
+                            <p>Total du prix de vente</p>
+                            <p className="text-blue-300">(article + livraison + TVA de l'acheteur)</p>
                         </th>
                         <td></td>
                         <td className="px-1 py-3 sm:px-6">
@@ -482,7 +483,8 @@ const Calculator = () => {
                     </tr>
                     <tr className="font-semibold bg-blue-100 text-slate-900 dark:text-white">
                         <th scope="row" className="px-1 py-3 sm:px-6">
-                            Bénéfice (Total du prix de vente - Total des frais Etsy - Coût de fabrication de l'article)
+                            <p>Bénéfice</p>
+                            <p className="text-blue-300">(Total du prix de vente - Total des frais Etsy - Coût de fabrication de l'article)</p>
                         </th>
                         <td></td>
                         <td className="px-1 py-3 sm:px-6">
